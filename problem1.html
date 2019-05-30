@@ -15,112 +15,114 @@
  <body>
   <h4>Problem 1</h4>
   <form>
+	Trains and current positions (0 = stations, 1 = trains):
     <textarea></textarea>
+	Start positions:
     <input value="0">
     <input value="0">
     <input value="0">
     <button>Start</button>
   </form>
  </body>
- <script>
- document.querySelector('form').addEventListener('submit', function(event){
+<script>
+ 
+document.querySelector('form').addEventListener('submit', function(event){
    event.preventDefault();
    let inputs = document.querySelectorAll('input')
    init(inputs[0].value, inputs[1].value, inputs[2].value)
- })
+})
 
- let init = function(sta = 0, stb = 0, stc = 0){
-   const getRand = () => parseInt(Math.random()* (99 - 10) + 10);
-   const time = 3000;
-   let intervalRef;
- 	 const routes = {
- 			a: [[0,0,1,0,2,0,0], sta, getRand(), sta, false, 'a', Array(7).fill(0)],
- 			b: [[0,0,3,2,0,0], stb, getRand(), stb, false, 'b', Array(6).fill(0)],
- 			c: [[0,0,1,3,0,0], stc, getRand(), stc, false, 'c', Array(6).fill(0)]
- 		}
-
- 		const startPosition = () => {
- 			for(let x in routes){
- 				routes[x][6].splice(routes[x][3],1,1)
- 			}
- 		}
-
- 		const printCurrentPos = () => {
- 			let status =
+let init = function(sta = 0, stb = 0, stc = 0){
+	const getRand = () => parseInt(Math.random()* (99 - 10) + 10);
+	const time = 3000;
+	let intervalRef;
+	
+	const routes = {
+		a: [[0,0,1,0,2,0,0], sta, getRand(), sta, false, 'a', Array(7).fill(0)],
+		b: [[0,0,3,2,0,0], stb, getRand(), stb, false, 'b', Array(6).fill(0)],
+		c: [[0,0,1,3,0,0], stc, getRand(), stc, false, 'c', Array(6).fill(0)]
+	}
+	
+	const startPosition = () => {
+		for(let x in routes){
+			routes[x][6].splice(routes[x][3],1,'1')
+		}
+	}
+		
+	const printCurrentPos = () => {
+ 	let status =
 `\nRoute A with ${routes['a'][2]} passengers: ${routes['a'][6]}
 Route B with ${routes['b'][2]} passengers: ${routes['b'][6]}
 Route C with ${routes['c'][2]} passengers: ${routes['c'][6]}
 ---------------`
-      document.querySelector("textarea").value += status;
- 		}
-
- 	  let startInterval = function(){
- 			startPosition();
- 			//printCurrentPos();
-      document.querySelector('textarea').value = '';
- 	  	intervalRef = window.setInterval(checkStatus, 3000)
- 	  }
-
- 	  const stopInterval = function(){
- 			clearInterval(intervalRef);
- 	  }
-
- 		const updatePos = x => {
- 			if(x[4] !== true){
- 				let temp = Array(x[0].length).fill(0);
- 				temp[x[3]-1] = 1;
- 				return temp
- 			} else {
- 				return x[6]
- 			}
- 		}
-
- 	  const checkStatus = function(){
- 	  	const per = [['a','b'], ['a','c'], ['b','c']];
- 	  	let temp = [];
- 			let incr = [];
- 			let temp1 = new Set();
-
- 			if(routes['a'][4] === true && routes['b'][4] === true && routes['c'][4] === true){
- 				stopInterval();
- 				document.querySelector('textarea').value += "\nAll trains reached their destinations";
- 				return;
- 			}
-
- 	  	per.forEach(x => {
- 				let pos1 = routes[x[0]];
- 				let pos2 = routes[x[1]];
- 	  		let r1 = routes[x[0]][0][pos1[3]];
- 	  		let r2 = routes[x[1]][0][pos2[3]];
-
- 	  		if(r1 && r2 && r1 === r2){
- 	  			temp.push(routes[x[0]]);
- 	  			temp.push(routes[x[1]]);
- 	  			temp.sort((a, b) => b[2] - a[2]);
- 	  			if(!temp[0][4]){
- 	  				incr.push(temp[0][5]);
- 	  				temp1.add(temp[0][5]);
- 	  				temp1.add(temp[1][5]);
- 	  			}
- 	  		}
- 	  	})
-
- 			for(let x of incr){
- 				routes[x][3]++
- 				routes[x][6] = updatePos(routes[x])
- 			}
-
- 			for(let route in routes){
- 				if(!temp1.has(route) && routes[route][4] !== true){
- 					routes[route][3]++
- 					routes[route][6] = updatePos(routes[route])
- 				}
-
- 				if(routes[route][0].length === routes[route][3]){
- 					routes[route][4] = true
- 				}
- 			}
- 			printCurrentPos();
+			document.querySelector("textarea").value += status;
+	}
+		
+	let startInterval = function(){
+		startPosition();
+		//printCurrentPos();
+		document.querySelector('textarea').value = '';
+		checkStatus();
+		intervalRef = window.setInterval(checkStatus, 3000)
+	}
+		
+	const stopInterval = function(){
+		clearInterval(intervalRef);
+	}
+	
+	const updatePos = x => {
+		if(x[4] !== true){
+			let temp = Array(x[0].length).fill(0);
+			temp[x[3]-1] = '1';
+			return temp
+		} else {
+			return x[6]
+		}
+	}
+	
+	const checkStatus = function(){
+		const per = [['a','b'], ['a','c'], ['b','c']];
+		let temp = [];
+		let incr = [];
+		let temp1 = new Set();
+		if(routes['a'][4] === true && routes['b'][4] === true && routes['c'][4] === true){
+			stopInterval();
+			document.querySelector('textarea').value += "\nAll trains reached their destinations";
+			return;
+		}
+		
+		per.forEach(x => {
+			let pos1 = routes[x[0]];
+			let pos2 = routes[x[1]];
+			let r1 = routes[x[0]][0][pos1[3]];
+			let r2 = routes[x[1]][0][pos2[3]];
+			if(r1 && r2 && r1 === r2){
+				temp.push(routes[x[0]]);
+				temp.push(routes[x[1]]);
+				temp.sort((a, b) => b[2] - a[2]);
+				if(!temp[0][4]){
+					incr.push(temp[0][5]);
+					temp1.add(temp[0][5]);
+					temp1.add(temp[1][5]);
+				}
+			}
+		})
+		
+		for(let x of incr){
+			routes[x][3]++
+			routes[x][6] = updatePos(routes[x])
+		}
+		
+		for(let route in routes){
+			if(!temp1.has(route) && routes[route][4] !== true){
+				routes[route][3]++
+				routes[route][6] = updatePos(routes[route])
+			}
+			if(routes[route][0].length === routes[route][3]){
+				routes[route][4] = true
+			}
+		}
+		printCurrentPos();
  	}
  	startInterval();
  }
